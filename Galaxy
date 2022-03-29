@@ -1,0 +1,97 @@
+from PIL import Image
+from random import *
+from datetime import datetime
+import time
+
+
+class Galaxy:
+    def __init__(self, width=1920, height=1080, file_name='galaxy-neural-system.jpg'):
+        self.space_mist_settings = {'generating_chance': randint(8, 12)}
+        self.space_flash_settings = {'stars_amount': randint((c := width * height // 64800) // 2, c)}
+        self.width, self.height, self.file_name = width, height, file_name
+        self.shades = [(124, 185, 232), (216, 255, 244), (63, 108, 138), (15, 255, 255),
+                       (46, 132, 255), (21, 21, 123), (15, 39, 183), (177, 177, 223),
+                       (40, 131, 225), (110, 173, 175), (178, 208, 188), (15, 206, 255),
+                       (56, 130, 181), (0, 0, 0), (125, 125, 255), (0, 36, 87),
+                       (140, 255, 255), (255, 255, 255), (81, 0, 225), (33, 0, 225),
+                       (0, 5, 119), (0, 1, 116), (18, 95, 165), (0, 0, 0),
+                       (0, 0, 0), (0, 0, 0), (0, 5, 119), (15, 255, 254), (15, 255, 254),
+                       (0, 5, 119), (0, 5, 119), (0, 5, 119), (0, 5, 119), (0, 1, 116),
+                       (0, 1, 116), (0, 36, 87), (0, 36, 87), (0, 36, 87)]  # to be filled more
+
+    def space_mist(self):
+        start_time = datetime.now()
+        print('Space_mist(module) loading...')
+        image = Image.new("RGB", (self.width, self.height))
+        pixels = image.load()
+        pixels_for_nebulas = []
+        for i in range(image.size[0]):
+            for j in range(image.size[1]):
+                if randrange(self.space_mist_settings['generating_chance']) == 0:
+                    pixels[i, j] = choice(self.shades)
+                else:
+                    pixels_for_nebulas.append(pixels[i, j])
+        print(f'Space_mist(module) loading complete in {(datetime.now() - start_time).seconds} seconds.')
+        time.sleep(1)
+        return image
+
+    def space_flash(self, im=Image.new('RGB', (1920, 1080))):
+        print('Space_flash(module) initializing...')
+        stars = [(randint(0, im.size[0] - 1),
+                  randint(0, im.size[1] - 1))
+                 for _ in range(self.space_flash_settings['stars_amount'])]
+        print(f'Adding {len(stars)} stars...')
+        pixels = im.load()
+        last = int(0 / (im.size[0] / 100)) // 10
+        if len(stars) != 0:
+            for i in range(im.size[0]):
+                if last != int(i / (im.size[0] / 100)) // 10:
+                    last = int(i / (im.size[0] / 100)) // 10
+                    print('Loading |' + last * '=' + (10 - last) * '-' +
+                          '| ' + str(last) + '0%')
+                if all(map(lambda s: abs(s[0] - i) > 20, stars)):
+                    continue
+                for j in range(im.size[1]):
+                    for star in stars:
+                        if (i in range(star[0] - 30, star[0] + 30)
+                                and j in range(star[1] - 30, star[1] + 30)):
+                            coef = abs(star[0] - i)
+                            koef = abs(star[1] - j)
+                            if coef == 0:
+                                coef = 1
+                            if koef == 0:
+                                koef = 1
+                            pixels[i, j] = (int((randint(71, 123) // coef) // koef) + pixels[i, j][0],
+                                            int((randint(183, 236) // coef) // koef) + pixels[i, j][1],
+                                            int((256 // coef) // koef) + pixels[i, j][2])
+        print('Loading Complete.')
+        im.save(self.file_name)
+        return im
+
+    def nebulas(self):
+        pass
+
+
+def main():
+    print('Space Imaging Tool v1.0')
+    while True:
+        inp = input()
+        if '/image' in inp:
+            if '/p' in inp:
+                galaxy = Galaxy(width=int((i := inp.split('/p ')[1].split('x'))[0]), height=int(i[1]))
+            else:
+                galaxy = Galaxy()
+            start_time = datetime.now()
+            galaxy.space_flash(im=galaxy.space_mist())
+            print(f'You wait {(datetime.now() - start_time).seconds} seconds ', end='')
+            if (datetime.now() - start_time).seconds > 20:
+                print('(its not good)')
+            else:
+                print('\n')
+        elif '/exit' in inp:
+            print('Exiting Space Imaging Tool...')
+            break
+        print('.' * 20)
+
+
+main()
